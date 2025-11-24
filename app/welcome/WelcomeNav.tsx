@@ -29,13 +29,13 @@ export default function WelcomeNav() {
 
   return (
     <header className="flex w-full items-center justify-between border-b border-gray-200 bg-[#fcfbf7] px-8 py-4">
-      <div className="flex items-center gap-3">
-        <div className="h-12 w-12">
+      <div className="flex items-center gap-4">
+        <div className="h-24 w-24">
           <Image
-            src="/images/multipartners-logo.svg"
+            src="/images/multipartners-logo.png"
             alt="Multi Partners GmbH"
-            width={48}
-            height={48}
+            width={192}
+            height={192}
             className="h-full w-full object-contain"
             priority
           />
