@@ -27,7 +27,7 @@ export default function WelcomeNav() {
   }, []);
 
   return (
-    <header className="flex w-full items-center justify-between border-b border-gray-200 bg-[#fcfbf7] px-10">
+    <header className="flex w-full items-center justify-between border-b border-gray-200 bg-[#fcfbf7] px-10 py-4">
       <div className="flex items-center gap-4">
         <span className="text-base font-semibold uppercase tracking-[0.35em] text-[#11273e]">
           Multi Partners GmbH
