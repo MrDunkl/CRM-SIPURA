@@ -1,7 +1,15 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useCallback, useEffect, useMemo, useState, type ChangeEvent, type FormEvent } from "react";
+import {
+  useCallback,
+  useEffect,
+  useMemo,
+  useState,
+  type ChangeEvent,
+  type FormEvent,
+  type MouseEvent,
+} from "react";
 import { useSessionContext } from "@supabase/auth-helpers-react";
 
 type Step =
@@ -32,6 +40,8 @@ type LeadDocumentGroup = {
   betriebskosten: LeadDocumentLink[];
   casino: LeadDocumentLink[];
 };
+
+type ResetAllOptions = { keepLeadContext?: boolean };
 
 type ExistingLead = {
   id: LeadIdentifier;
@@ -159,7 +169,12 @@ const [casinoDocument, setCasinoDocument] = useState<File | null>(null);
     birthDate: "",
   });
 
-  const resetAll = (options?: { keepLeadContext?: boolean }) => {
+  const resetAll = (arg?: ResetAllOptions | MouseEvent<HTMLButtonElement>) => {
+    const options =
+      arg && typeof arg === "object" && "preventDefault" in arg
+        ? undefined
+        : (arg as ResetAllOptions | undefined);
+
     setStep("leadType");
     setSelectedLeadType(null);
     setSelectedCustomerType(null);
