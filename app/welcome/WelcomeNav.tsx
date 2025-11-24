@@ -28,7 +28,7 @@ export default function WelcomeNav() {
   }, []);
 
   return (
-    <header className="flex w-full items-center justify-between border-b border-gray-200 bg-[#fcfbf7] px-10 py-5">
+    <header className="flex w-full items-center justify-between border-b border-gray-200 bg-[#fcfbf7] px-10">
       <div className="flex items-center gap-4">
         <div className="h-20 w-20">
           <Image
