@@ -8,7 +8,7 @@ import {
   useState,
   type ChangeEvent,
   type FormEvent,
-  type MouseEvent,
+  type MouseEventHandler,
 } from "react";
 import { useSessionContext } from "@supabase/auth-helpers-react";
 
@@ -169,12 +169,7 @@ const [casinoDocument, setCasinoDocument] = useState<File | null>(null);
     birthDate: "",
   });
 
-  const resetAll = (arg?: ResetAllOptions | MouseEvent<HTMLButtonElement>) => {
-    const options =
-      arg && typeof arg === "object" && "preventDefault" in arg
-        ? undefined
-        : (arg as ResetAllOptions | undefined);
-
+  const resetAll = (options?: ResetAllOptions) => {
     setStep("leadType");
     setSelectedLeadType(null);
     setSelectedCustomerType(null);
@@ -220,6 +215,10 @@ const [casinoDocument, setCasinoDocument] = useState<File | null>(null);
     if (!options?.keepLeadContext) {
       setCurrentLeadId(null);
     }
+  };
+
+  const handleResetAllClick: MouseEventHandler<HTMLButtonElement> = () => {
+    resetAll();
   };
 
   const toggleBank = (bank: string) => {
@@ -764,7 +763,7 @@ const activeLeadDocuments = activeLead?.documents ?? { energie: [], betriebskost
                   {isLoadingBestands ? "Aktualisiere..." : "Aktualisieren"}
                 </button>
                 <button
-                  onClick={() => resetAll()}
+                  onClick={handleResetAllClick}
                   className="rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-600 hover:bg-white"
                 >
                   Zurück
@@ -980,7 +979,7 @@ const activeLeadDocuments = activeLead?.documents ?? { energie: [], betriebskost
                 {selectedLeadType === "bestands" ? "Bestands Lead" : "Neuer Lead"} · Allgemeine Informationen
               </h2>
               <button
-                onClick={() => resetAll()}
+                onClick={handleResetAllClick}
                 className="text-sm text-gray-500 hover:text-gray-700"
               >
                 Schließen
