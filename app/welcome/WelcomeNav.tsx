@@ -28,41 +28,38 @@ export default function WelcomeNav() {
   }, []);
 
   return (
-    <header className="flex w-full items-center justify-between border-b border-gray-200 bg-white px-8 py-5">
-      <div className="flex items-center gap-4">
-        <div className="h-14 w-14">
+    <header className="flex w-full items-center justify-between border-b border-gray-200 bg-[#fcfbf7] px-8 py-4">
+      <div className="flex items-center gap-3">
+        <div className="h-12 w-12">
           <Image
             src="/images/multipartners-logo.svg"
             alt="Multi Partners GmbH"
-            width={56}
-            height={56}
+            width={48}
+            height={48}
             className="h-full w-full object-contain"
             priority
           />
         </div>
-        <span className="text-base font-semibold tracking-[0.2em] text-[#2c3a4a] uppercase">
-          Multi Partners GmbH
-        </span>
       </div>
 
-      <nav className="flex items-center gap-10 text-base font-semibold text-[#1c1c1c]">
+      <nav className="flex items-center gap-8 text-sm font-semibold text-[#1c1c1c]">
         <div ref={dropdownRef} className="group relative flex flex-col items-center">
           <button
             type="button"
             onClick={() => setOpen((prev) => !prev)}
-            className={`flex items-center gap-2 pb-3 transition-colors ${
+            className={`flex cursor-pointer items-center gap-2 pb-2 transition-colors ${
               open ? "text-[#11273e]" : "hover:text-[#11273e]"
             }`}
           >
             <span>Unsere Projekte</span>
             <IoIosArrowDown className={`text-lg transition-transform ${open ? "rotate-180" : ""}`} />
           </button>
-          <span className={`h-[2px] w-28 bg-[#1d5edb] transition-opacity duration-200 ${open ? "opacity-100" : "opacity-70 group-hover:opacity-100"}`} />
+          <span className={`h-[2px] w-20 bg-[#1d5edb] transition-opacity duration-200 ${open ? "opacity-100" : "opacity-70 group-hover:opacity-100"}`} />
           {open && (
             <div className="absolute top-full z-10 mt-1 w-64 rounded-lg border border-gray-200 bg-white py-4 shadow-lg">
               <ul className="flex flex-col gap-3 px-6 text-sm text-[#1c1c1c]">
                 {projectLinks.map((label) => (
-                  <li key={label} className="font-medium hover:text-[#11273e]">
+                  <li key={label} className="cursor-pointer font-medium hover:text-[#11273e]">
                     {label}
                   </li>
                 ))}
@@ -72,7 +69,7 @@ export default function WelcomeNav() {
         </div>
         <a
           href="#kontakt"
-          className="pb-3 text-base font-semibold text-[#1c1c1c] hover:text-[#11273e]"
+          className="pb-2 text-sm font-semibold text-[#1c1c1c] transition-colors hover:text-[#11273e]"
         >
           Kontakt
         </a>
