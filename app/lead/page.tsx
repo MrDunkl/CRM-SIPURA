@@ -41,7 +41,7 @@ type LeadDocumentGroup = {
   casino: LeadDocumentLink[];
 };
 
-type ResetAllOptions = { keepLeadContext?: boolean };
+type ResetStateOptions = { keepLeadContext?: boolean };
 
 type ExistingLead = {
   id: LeadIdentifier;
@@ -169,7 +169,7 @@ const [casinoDocument, setCasinoDocument] = useState<File | null>(null);
     birthDate: "",
   });
 
-  const resetAll = (options?: ResetAllOptions) => {
+  const resetLeadState = (options?: ResetStateOptions) => {
     setStep("leadType");
     setSelectedLeadType(null);
     setSelectedCustomerType(null);
@@ -218,7 +218,7 @@ const [casinoDocument, setCasinoDocument] = useState<File | null>(null);
   };
 
   const handleResetAllClick: MouseEventHandler<HTMLButtonElement> = () => {
-    resetAll();
+    resetLeadState();
   };
 
   const toggleBank = (bank: string) => {
@@ -449,7 +449,7 @@ const [casinoDocument, setCasinoDocument] = useState<File | null>(null);
       }
 
       setToast({ message: "Casino-Verluste erfasst!", type: "success" });
-      resetAll();
+      resetLeadState();
       setCategoryIndex(0);
       router.push("/");
     } catch (error) {
@@ -642,7 +642,7 @@ const activeLeadDocuments = activeLead?.documents ?? { energie: [], betriebskost
       setCurrentLeadId(result.leadId);
       const nextIndex = Math.min(categoryIndex + 1, categoryTabs.length - 1);
       setCategoryIndex(nextIndex);
-      resetAll({ keepLeadContext: true });
+      resetLeadState({ keepLeadContext: true });
     } catch (error) {
       console.error(error);
       setToast({ message: "Speichern fehlgeschlagen. Bitte erneut versuchen.", type: "error" });
