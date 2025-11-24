@@ -749,7 +749,7 @@ const activeLeadDocuments = activeLead?.documents ?? { energie: [], betriebskost
                   {isLoadingBestands ? "Aktualisiere..." : "Aktualisieren"}
                 </button>
                 <button
-                  onClick={resetAll}
+                  onClick={() => resetAll()}
                   className="rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-600 hover:bg-white"
                 >
                   Zurück
@@ -965,7 +965,7 @@ const activeLeadDocuments = activeLead?.documents ?? { energie: [], betriebskost
                 {selectedLeadType === "bestands" ? "Bestands Lead" : "Neuer Lead"} · Allgemeine Informationen
               </h2>
               <button
-                onClick={resetAll}
+                onClick={() => resetAll()}
                 className="text-sm text-gray-500 hover:text-gray-700"
               >
                 Schließen
