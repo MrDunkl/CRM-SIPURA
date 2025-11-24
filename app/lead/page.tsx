@@ -43,6 +43,10 @@ type LeadDocumentGroup = {
 
 type ResetStateOptions = { keepLeadContext?: boolean };
 
+const PRODUCTION_DOCUMENT_BASE =
+  process.env.NEXT_PUBLIC_DOCUMENT_BASE_URL ?? "https://crm-sipura.vercel.app";
+const LOCAL_HOST_PATTERN = /^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?/i;
+
 type ExistingLead = {
   id: LeadIdentifier;
   lead_type: LeadType | string | null;
@@ -539,6 +543,31 @@ const [casinoDocument, setCasinoDocument] = useState<File | null>(null);
 const activeLeadDocuments = activeLead?.documents ?? { energie: [], betriebskosten: [], casino: [] };
   const showStepper = !(categoryIndex === 0 && step === "bestandsOverview");
 
+  const resolveDocumentHref = useCallback(
+    (raw?: string | null) => {
+      if (!raw || !raw.trim()) return "";
+      const trimmed = raw.trim();
+      if (/^https?:\/\//i.test(trimmed)) {
+        return trimmed.replace(LOCAL_HOST_PATTERN, PRODUCTION_DOCUMENT_BASE);
+      }
+      if (trimmed.startsWith("/")) {
+        try {
+          const base = new URL(PRODUCTION_DOCUMENT_BASE);
+          const normalizedBasePath = base.pathname.endsWith("/")
+            ? base.pathname.slice(0, -1)
+            : base.pathname;
+          const shouldDropBasePath = trimmed.startsWith("/api/");
+          const prefixPath = shouldDropBasePath ? "" : normalizedBasePath;
+          return `${base.origin}${prefixPath}${trimmed}`;
+        } catch {
+          return `${PRODUCTION_DOCUMENT_BASE.replace(/\/$/, "")}${trimmed}`;
+        }
+      }
+      return trimmed;
+    },
+    []
+  );
+
   const renderDocumentSection = (title: string, docs: LeadDocumentLink[]) => {
     const hasDocs = docs.length > 0;
     return (
@@ -554,7 +583,7 @@ const activeLeadDocuments = activeLead?.documents ?? { energie: [], betriebskost
         ) : (
           <div className="space-y-2">
             {docs.map((doc) => {
-              const href = doc.url || doc.fallbackUrl || "";
+              const href = resolveDocumentHref(doc.url || doc.fallbackUrl || "");
               const isDisabled = !href;
               return (
                 <a
