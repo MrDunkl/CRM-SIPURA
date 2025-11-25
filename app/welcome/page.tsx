@@ -15,22 +15,22 @@ export const metadata: Metadata = {
 export default function WelcomePage() {
   const tiles = [
     {
-      title: "Casinoverluste zurückholen",
+      title: "Energie & Stromkosten",
       description:
-        "Wir prüfen deinen Fall und kämpfen für die Rückzahlung deiner Spieleinsätze bei illegalen Anbietern.",
-      action: "Verluste prüfen lassen",
+        "Wir analysieren Strom- und Gasabrechnungen, entdecken versteckte Gebühren und setzen Rückforderungen durch.",
+      action: "Kosten prüfen lassen",
       icon: FiShield,
-      accent: "bg-[#fcefc7] text-[#b45309]",
-      accentHover: "hover:bg-[#fbd38d]",
+      accent: "bg-[#f1f5ff] text-[#1d4ed8]",
+      accentHover: "hover:bg-[#dce6ff]",
     },
     {
-      title: "Kreditbearbeitungsgebühren",
+      title: "Betriebskosten optimieren",
       description:
-        "Wir fordern unzulässige Gebühren effizient zurück – basierend auf aktueller OGH-Rechtsprechung.",
-      action: "Gebühren anfechten",
+        "Wir prüfen die jährlichen Betriebskostenabrechnungen und machen überhöhte Positionen sofort geltend.",
+      action: "Einsparung sichern",
       icon: RiBankCardLine,
-      accent: "bg-[#e0edff] text-[#1d4ed8]",
-      accentHover: "hover:bg-[#c7dbff]",
+      accent: "bg-[#fef3c7] text-[#b45309]",
+      accentHover: "hover:bg-[#fde68a]",
     },
     {
       title: "Weitere Projekte",
