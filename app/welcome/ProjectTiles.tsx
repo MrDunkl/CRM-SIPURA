@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useMemo, useState } from "react";
 import { FiShield } from "react-icons/fi";
 import { HiOutlineFolder } from "react-icons/hi";
@@ -14,6 +15,7 @@ interface TileData {
   accent: string;
   accentHover: string;
   onClick?: () => void;
+  href?: string;
 }
 
 export default function ProjectTiles() {
@@ -62,6 +64,7 @@ export default function ProjectTiles() {
       icon: RiMoneyEuroCircleLine,
       accent: "bg-[#eef2ff] text-[#1d4ed8]",
       accentHover: "hover:bg-[#d7e0ff]",
+      href: "/projects/kreditbearbeitungsgebuehren",
     },
     {
       title: "Casinoverluste",
@@ -71,11 +74,29 @@ export default function ProjectTiles() {
       icon: TbPokerChip,
       accent: "bg-[#fff1f0] text-[#b91c1c]",
       accentHover: "hover:bg-[#ffe0de]",
+      href: "/projects/casinoverluste",
     },
   ];
 
   const renderTile = (tile: TileData) => {
     const Icon = tile.icon;
+    const Action = tile.href ? (
+      <Link
+        href={tile.href}
+        className="mt-auto inline-flex items-center justify-center rounded-2xl bg-[#1d5edb] px-4 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-[#174cbc]"
+      >
+        {tile.action}
+      </Link>
+    ) : (
+      <button
+        type="button"
+        onClick={tile.onClick}
+        className="mt-auto inline-flex items-center justify-center rounded-2xl bg-[#1d5edb] px-4 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-[#174cbc]"
+      >
+        {tile.action}
+      </button>
+    );
+
     return (
       <div
         key={tile.title}
@@ -90,13 +111,7 @@ export default function ProjectTiles() {
           <h3 className="text-lg font-semibold text-[#11273e]">{tile.title}</h3>
           <p className="text-sm leading-relaxed text-gray-600">{tile.description}</p>
         </div>
-        <button
-          type="button"
-          onClick={tile.onClick}
-          className="mt-auto inline-flex items-center justify-center rounded-2xl bg-[#1d5edb] px-4 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-[#174cbc]"
-        >
-          {tile.action}
-        </button>
+        {Action}
       </div>
     );
   };
@@ -108,28 +123,7 @@ export default function ProjectTiles() {
       </div>
       {showExtras && (
         <div className="grid w-full max-w-5xl gap-6 md:grid-cols-2">
-          {extraTiles.map((tile) => (
-            <div
-              key={tile.title}
-              className="flex flex-col gap-6 rounded-3xl border border-[#e5e7eb] bg-white p-6 shadow-[0_12px_35px_-18px_rgba(15,39,62,0.35)] transition-transform duration-200 hover:-translate-y-1 hover:shadow-[0_16px_35px_-18px_rgba(17,39,62,0.35)]"
-            >
-              <span
-                className={`inline-flex h-12 w-12 items-center justify-center rounded-2xl text-xl font-semibold transition-colors duration-300 ${tile.accent} ${tile.accentHover}`}
-              >
-                <tile.icon />
-              </span>
-              <div className="space-y-2">
-                <h3 className="text-lg font-semibold text-[#11273e]">{tile.title}</h3>
-                <p className="text-sm leading-relaxed text-gray-600">{tile.description}</p>
-              </div>
-              <button
-                type="button"
-                className="mt-auto inline-flex items-center justify-center rounded-2xl bg-[#1d5edb] px-4 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-[#174cbc]"
-              >
-                {tile.action}
-              </button>
-            </div>
-          ))}
+          {extraTiles.map(renderTile)}
         </div>
       )}
     </>
