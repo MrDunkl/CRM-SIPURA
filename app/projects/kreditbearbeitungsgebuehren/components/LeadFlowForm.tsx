@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useMemo, useState } from "react";
 
 type Persona = "private" | "business";
-type FlowStep = "persona" | "banks" | "amount" | "summary";
+type FlowStep = "persona" | "banks" | "amount" | "borrowers" | "summary";
 
 const personas: Array<{
   id: Persona;
@@ -59,10 +59,14 @@ export default function LeadFlowForm() {
   const [persona, setPersona] = useState<Persona | null>(null);
   const [selectedBanks, setSelectedBanks] = useState<string[]>([]);
   const [selectedAmount, setSelectedAmount] = useState<string | null>(null);
+  const [borrowerCount, setBorrowerCount] = useState<"single" | "multiple" | null>(null);
+  const [consentPrivacy, setConsentPrivacy] = useState(false);
+  const [consentTerms, setConsentTerms] = useState(false);
   const [submitted, setSubmitted] = useState(false);
 
   const canProceedBanks = persona !== null && selectedBanks.length > 0;
   const canProceedAmount = Boolean(selectedAmount);
+  const canProceedBorrowers = Boolean(borrowerCount && consentPrivacy && consentTerms);
 
   const personaCards = useMemo(
     () =>
@@ -101,12 +105,18 @@ export default function LeadFlowForm() {
       setPersona(null);
       setSelectedBanks([]);
       setSelectedAmount(null);
+      setBorrowerCount(null);
+      setConsentPrivacy(false);
+      setConsentTerms(false);
       setStep("persona");
     } else if (step === "amount") {
       setSelectedAmount(null);
       setStep("banks");
-    } else if (step === "summary") {
+    } else if (step === "borrowers") {
+      setBorrowerCount(null);
       setStep("amount");
+    } else if (step === "summary") {
+      setStep("borrowers");
       setSubmitted(false);
     }
   };
@@ -118,6 +128,11 @@ export default function LeadFlowForm() {
 
   const handleProceedAmount = () => {
     if (!canProceedAmount) return;
+    setStep("borrowers");
+  };
+
+  const handleProceedBorrowers = () => {
+    if (!canProceedBorrowers) return;
     setStep("summary");
     setSubmitted(true);
   };
@@ -246,6 +261,99 @@ export default function LeadFlowForm() {
         </div>
       )}
 
+      {step === "borrowers" && (
+        <div className="rounded-[32px] bg-white/95 p-6 shadow-[0_25px_80px_-40px_rgba(17,39,62,0.5)] md:p-8">
+          <div className="flex items-center justify-between gap-4">
+            <div className="text-sm font-semibold uppercase tracking-[0.32em] text-[#1d5edb]">
+              Wie viele Kreditnehmer gibt es?
+            </div>
+            <button
+              type="button"
+              onClick={handleBack}
+              className="text-sm font-medium text-[#1d5edb] transition hover:text-[#174cbc]"
+            >
+              Zurück
+            </button>
+          </div>
+          <p className="mt-3 text-2xl font-semibold text-[#11273e]">
+            Bitte wähle, ob du allein oder gemeinsam den Kredit aufgenommen hast.
+          </p>
+
+          <div className="mt-6 grid gap-4 md:grid-cols-2">
+            {[
+              { value: "single", label: "Ich bin der Einzige" },
+              { value: "multiple", label: "Es gibt mehrere Kreditnehmer" },
+            ].map((option) => {
+              const active = borrowerCount === option.value;
+              return (
+                <button
+                  key={option.value}
+                  type="button"
+                  onClick={() => setBorrowerCount(option.value as "single" | "multiple")}
+                  className={`flex flex-col items-center gap-3 rounded-3xl border px-5 py-5 text-base font-semibold transition ${
+                    active
+                      ? "border-[#1d5edb] bg-[#f0f4ff] text-[#1d5edb]"
+                      : "border-[#e2e6f2] bg-white text-[#11273e] hover:border-[#cfe0ff]"
+                  }`}
+                >
+                  <span>{option.label}</span>
+                </button>
+              );
+            })}
+          </div>
+
+          <div className="mt-8 space-y-3 text-left text-sm text-[#3b4a68]">
+            <label className="flex items-center gap-3">
+              <input
+                type="checkbox"
+                checked={consentPrivacy}
+                onChange={(event) => setConsentPrivacy(event.target.checked)}
+                className="h-4 w-4 rounded border-[#cfe0ff] text-[#1d5edb] focus:ring-[#1d5edb]"
+              />
+              <span>
+                Ich akzeptiere die{" "}
+                <Link href="#" className="underline">
+                  Datenschutzbestimmungen
+                </Link>{" "}
+                und habe die{" "}
+                <Link href="#" className="underline">
+                  Widerrufsbelehrung
+                </Link>{" "}
+                gelesen.
+              </span>
+            </label>
+            <label className="flex items-center gap-3">
+              <input
+                type="checkbox"
+                checked={consentTerms}
+                onChange={(event) => setConsentTerms(event.target.checked)}
+                className="h-4 w-4 rounded border-[#cfe0ff] text-[#1d5edb] focus:ring-[#1d5edb]"
+              />
+              <span>
+                Ich akzeptiere die{" "}
+                <Link href="#" className="underline">
+                  Allgemeinen Finanzierungsbedingungen
+                </Link>
+                .
+              </span>
+            </label>
+          </div>
+
+          <button
+            type="button"
+            disabled={!canProceedBorrowers}
+            onClick={handleProceedBorrowers}
+            className={`mt-6 w-full rounded-2xl px-5 py-3 text-sm font-semibold uppercase tracking-wide transition ${
+              canProceedBorrowers
+                ? "bg-[#1d5edb] text-white hover:bg-[#174cbc]"
+                : "cursor-not-allowed bg-[#e2e8f5] text-[#94a3b8]"
+            }`}
+          >
+            Speichern &amp; zurück
+          </button>
+        </div>
+      )}
+
       {step === "summary" && (
         <div className="rounded-[32px] bg-white/95 p-6 shadow-[0_25px_80px_-40px_rgba(17,39,62,0.5)] md:p-8">
           <div className="flex items-center justify-between gap-4">
@@ -271,11 +379,15 @@ export default function LeadFlowForm() {
             <p>
               <strong>Kreditsumme:</strong> {selectedAmount ?? "–"}
             </p>
+            <p>
+              <strong>Kreditnehmer:</strong>{" "}
+              {borrowerCount === "multiple" ? "Mehrere Kreditnehmer" : "Ein Kreditnehmer"}
+            </p>
           </div>
         </div>
       )}
 
-      {submitted && persona && selectedAmount && (
+      {submitted && persona && selectedAmount && borrowerCount && (
         <div className="rounded-3xl bg-[#f7faff] p-6 text-left shadow-inner">
           <h3 className="text-lg font-semibold text-[#11273e]">
             Fast geschafft – Multi Partners kümmert sich um den Rest.
