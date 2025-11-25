@@ -4,7 +4,13 @@ import Link from "next/link";
 import { useMemo, useState } from "react";
 
 type Persona = "private" | "business";
-type FlowStep = "persona" | "banks" | "amount" | "borrowers" | "summary";
+type FlowStep =
+  | "persona"
+  | "banks"
+  | "amount"
+  | "borrowers"
+  | "contact"
+  | "summary";
 
 const personas: Array<{
   id: Persona;
@@ -62,11 +68,18 @@ export default function LeadFlowForm() {
   const [borrowerCount, setBorrowerCount] = useState<"single" | "multiple" | null>(null);
   const [consentPrivacy, setConsentPrivacy] = useState(false);
   const [consentTerms, setConsentTerms] = useState(false);
+  const [contactName, setContactName] = useState("");
+  const [contactPhone, setContactPhone] = useState("");
+  const [contactEmail, setContactEmail] = useState("");
+  const canProceedContact =
+    Boolean(contactName.trim() && contactPhone.trim() && contactEmail.trim()) &&
+    consentPrivacy &&
+    consentTerms;
   const [submitted, setSubmitted] = useState(false);
 
   const canProceedBanks = persona !== null && selectedBanks.length > 0;
   const canProceedAmount = Boolean(selectedAmount);
-  const canProceedBorrowers = Boolean(borrowerCount && consentPrivacy && consentTerms);
+  const canProceedBorrowers = Boolean(borrowerCount);
 
   const personaCards = useMemo(
     () =>
@@ -108,6 +121,9 @@ export default function LeadFlowForm() {
       setBorrowerCount(null);
       setConsentPrivacy(false);
       setConsentTerms(false);
+      setContactName("");
+      setContactPhone("");
+      setContactEmail("");
       setStep("persona");
     } else if (step === "amount") {
       setSelectedAmount(null);
@@ -115,8 +131,15 @@ export default function LeadFlowForm() {
     } else if (step === "borrowers") {
       setBorrowerCount(null);
       setStep("amount");
-    } else if (step === "summary") {
+    } else if (step === "contact") {
+      setContactName("");
+      setContactPhone("");
+      setContactEmail("");
+      setConsentPrivacy(false);
+      setConsentTerms(false);
       setStep("borrowers");
+    } else if (step === "summary") {
+      setStep("contact");
       setSubmitted(false);
     }
   };
@@ -133,6 +156,11 @@ export default function LeadFlowForm() {
 
   const handleProceedBorrowers = () => {
     if (!canProceedBorrowers) return;
+    setStep("contact");
+  };
+
+  const handleProceedContact = () => {
+    if (!canProceedContact) return;
     setStep("summary");
     setSubmitted(true);
   };
@@ -354,6 +382,124 @@ export default function LeadFlowForm() {
         </div>
       )}
 
+      {step === "contact" && (
+        <div className="rounded-[32px] bg-white/95 p-6 shadow-[0_25px_80px_-40px_rgba(17,39,62,0.5)] md:p-8">
+          <div className="flex items-center justify-between gap-4">
+            <div className="text-sm font-semibold uppercase tracking-[0.32em] text-[#1d5edb]">
+              Letzter Schritt
+            </div>
+            <button
+              type="button"
+              onClick={handleBack}
+              className="text-sm font-medium text-[#1d5edb] transition hover:text-[#174cbc]"
+            >
+              Zurück
+            </button>
+          </div>
+
+          <div className="mt-4 space-y-2 text-center">
+            <span className="inline-flex items-center justify-center rounded-full bg-[#34d399]/15 px-4 py-1 text-xs font-semibold uppercase tracking-[0.4em] text-[#0f5132]">
+              Geschafft!
+            </span>
+            <p className="text-xs text-[#3b4a68]/70">
+              Um deine Anfrage zu qualifizieren, benötigen wir jetzt nur noch deine Kontaktdaten.
+            </p>
+            <h2 className="text-3xl font-semibold text-[#11273e]">
+              Wie können wir dich am besten erreichen?
+            </h2>
+          </div>
+
+          <form className="mt-6 space-y-4">
+            <label className="block text-left">
+              <span className="text-xs font-semibold uppercase tracking-widest text-[#9aa9c8]">
+                Dein vollständiger Name
+              </span>
+              <input
+                type="text"
+                value={contactName}
+                onChange={(event) => setContactName(event.target.value)}
+                className="mt-1 w-full rounded-2xl border border-[#dbe3f5] bg-[#f9fbff] px-4 py-3 text-sm text-[#11273e] shadow-sm focus:border-[#1d5edb] focus:outline-none focus:ring-2 focus:ring-[#1d5edb]/30"
+                placeholder="Max Mustermann"
+              />
+            </label>
+            <label className="block text-left">
+              <span className="text-xs font-semibold uppercase tracking-widest text-[#9aa9c8]">
+                Telefonnummer
+              </span>
+              <input
+                type="tel"
+                value={contactPhone}
+                onChange={(event) => setContactPhone(event.target.value)}
+                className="mt-1 w-full rounded-2xl border border-[#dbe3f5] bg-[#f9fbff] px-4 py-3 text-sm text-[#11273e] shadow-sm focus:border-[#1d5edb] focus:outline-none focus:ring-2 focus:ring-[#1d5edb]/30"
+                placeholder="+43 660 1234567"
+              />
+            </label>
+            <label className="block text-left">
+              <span className="text-xs font-semibold uppercase tracking-widest text-[#9aa9c8]">
+                E-Mail-Adresse
+              </span>
+              <input
+                type="email"
+                value={contactEmail}
+                onChange={(event) => setContactEmail(event.target.value)}
+                className="mt-1 w-full rounded-2xl border border-[#dbe3f5] bg-[#f9fbff] px-4 py-3 text-sm text-[#11273e] shadow-sm focus:border-[#1d5edb] focus:outline-none focus:ring-2 focus:ring-[#1d5edb]/30"
+                placeholder="name@beispiel.at"
+              />
+            </label>
+
+            <div className="space-y-3 pt-2 text-left text-sm text-[#3b4a68]">
+              <label className="flex items-center gap-3">
+                <input
+                  type="checkbox"
+                  checked={consentPrivacy}
+                  onChange={(event) => setConsentPrivacy(event.target.checked)}
+                  className="h-4 w-4 rounded border-[#cfe0ff] text-[#1d5edb] focus:ring-[#1d5edb]"
+                />
+                <span>
+                  Ich akzeptiere die{" "}
+                  <Link href="#" className="underline">
+                    Datenschutzbestimmungen
+                  </Link>{" "}
+                  und habe die{" "}
+                  <Link href="#" className="underline">
+                    Widerrufsbelehrung
+                  </Link>{" "}
+                  gelesen.
+                </span>
+              </label>
+              <label className="flex items-center gap-3">
+                <input
+                  type="checkbox"
+                  checked={consentTerms}
+                  onChange={(event) => setConsentTerms(event.target.checked)}
+                  className="h-4 w-4 rounded border-[#cfe0ff] text-[#1d5edb] focus:ring-[#1d5edb]"
+                />
+                <span>
+                  Ich akzeptiere die{" "}
+                  <Link href="#" className="underline">
+                    Allgemeinen Finanzierungsbedingungen
+                  </Link>
+                  .
+                </span>
+              </label>
+            </div>
+          </form>
+
+          <button
+            type="button"
+            disabled={!canProceedContact}
+            onClick={handleProceedContact}
+            className={`mt-8 w-full rounded-2xl px-5 py-3 text-sm font-semibold uppercase tracking-wide transition ${
+              canProceedContact
+                ? "bg-[#1d5edb] text-white hover:bg-[#174cbc]"
+                : "cursor-not-allowed bg-[#e2e8f5] text-[#94a3b8]"
+            }`}
+          >
+            Anfrage abschicken!
+          </button>
+        </div>
+      )}
+
       {step === "summary" && (
         <div className="rounded-[32px] bg-white/95 p-6 shadow-[0_25px_80px_-40px_rgba(17,39,62,0.5)] md:p-8">
           <div className="flex items-center justify-between gap-4">
@@ -387,7 +533,7 @@ export default function LeadFlowForm() {
         </div>
       )}
 
-      {submitted && persona && selectedAmount && borrowerCount && (
+      {submitted && persona && selectedAmount && borrowerCount && canProceedContact && (
         <div className="rounded-3xl bg-[#f7faff] p-6 text-left shadow-inner">
           <h3 className="text-lg font-semibold text-[#11273e]">
             Fast geschafft – Multi Partners kümmert sich um den Rest.
