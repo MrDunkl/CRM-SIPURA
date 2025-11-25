@@ -1,8 +1,8 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState, type ComponentType } from "react";
 import { FiRefreshCw, FiTarget } from "react-icons/fi";
-import { RiHandshakeLine } from "react-icons/ri";
+import { RiShakeHandsLine } from "react-icons/ri";
 
 const SWITCH_INTERVAL = 6000;
 const FADE_MS = 250;
@@ -10,7 +10,7 @@ const FADE_MS = 250;
 type Solution = {
   title: string;
   description: string;
-  icon: React.ComponentType<{ className?: string }>;
+  icon: ComponentType<{ className?: string }>;
 };
 
 const solutions: Solution[] = [
@@ -18,7 +18,7 @@ const solutions: Solution[] = [
     title: "Forderungskauf",
     description:
       "Multi Partners übernimmt deinen Anspruch und überweist dir den vereinbarten Kaufpreis – schnell und unabhängig vom Prozessausgang.",
-    icon: RiHandshakeLine,
+    icon: RiShakeHandsLine,
   },
   {
     title: "Prozessfinanzierung",
