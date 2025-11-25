@@ -3,6 +3,7 @@ import { FiShield } from "react-icons/fi";
 import { HiOutlineFolder } from "react-icons/hi";
 import { RiBankCardLine } from "react-icons/ri";
 import AnimatedHeadline from "./AnimatedHeadline";
+import RotatingSolutions from "./RotatingSolutions";
 import WelcomeNav from "./WelcomeNav";
 
 export const metadata: Metadata = {
@@ -70,6 +71,7 @@ export default function WelcomePage() {
             </div>
           ))}
         </div>
+        <RotatingSolutions />
       </main>
     </>
   );
