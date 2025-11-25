@@ -55,10 +55,17 @@ const loanRanges = [
   "über 1.000.000 €",
 ];
 
+const borrowerOptions: Array<{ value: "single" | "multiple"; label: string }> = [
+  { value: "single", label: "Ich bin der Einzige" },
+  { value: "multiple", label: "Es gibt mehrere Kreditnehmer" },
+];
+
 const personaHeadline: Record<Persona, string> = {
   private: "Privatkunde · Bank wählen",
   business: "Unternehmen · Bank wählen",
 };
+
+const DEFAULT_ADMIN_ID = process.env.NEXT_PUBLIC_CAMPAIGN_ADMIN_ID ?? "";
 
 export default function LeadFlowForm() {
   const [step, setStep] = useState<FlowStep>("persona");
@@ -66,33 +73,36 @@ export default function LeadFlowForm() {
   const [selectedBanks, setSelectedBanks] = useState<string[]>([]);
   const [selectedAmount, setSelectedAmount] = useState<string | null>(null);
   const [borrowerCount, setBorrowerCount] = useState<"single" | "multiple" | null>(null);
-  const [consentPrivacy, setConsentPrivacy] = useState(false);
-  const [consentTerms, setConsentTerms] = useState(false);
   const [contactName, setContactName] = useState("");
   const [contactPhone, setContactPhone] = useState("");
   const [contactEmail, setContactEmail] = useState("");
-  const canProceedContact =
-    Boolean(contactName.trim() && contactPhone.trim() && contactEmail.trim()) &&
-    consentPrivacy &&
-    consentTerms;
+  const [consentPrivacy, setConsentPrivacy] = useState(false);
+  const [consentTerms, setConsentTerms] = useState(false);
+  const [leadId, setLeadId] = useState<string | null>(null);
+  const [submitError, setSubmitError] = useState<string | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
 
   const canProceedBanks = persona !== null && selectedBanks.length > 0;
   const canProceedAmount = Boolean(selectedAmount);
   const canProceedBorrowers = Boolean(borrowerCount);
+  const canProceedContact =
+    Boolean(contactName.trim() && contactPhone.trim() && contactEmail.trim()) &&
+    consentPrivacy &&
+    consentTerms;
 
   const personaCards = useMemo(
     () =>
       personas.map((item) => (
         <button
           key={item.id}
+          type="button"
           onClick={() => {
             setPersona(item.id);
             setSubmitted(false);
             setStep("banks");
           }}
           className="flex flex-col gap-4 rounded-3xl bg-white p-8 text-left shadow-[0_20px_65px_-35px_rgba(17,39,62,0.4)] transition hover:-translate-y-2 hover:shadow-[0_26px_75px_-35px_rgba(29,94,219,0.35)]"
-          type="button"
         >
           <span className="text-sm font-medium uppercase tracking-[0.28em] text-[#9aa9c8]">
             {item.subtitle}
@@ -113,17 +123,23 @@ export default function LeadFlowForm() {
     );
   };
 
+  const resetContact = () => {
+    setContactName("");
+    setContactPhone("");
+    setContactEmail("");
+    setConsentPrivacy(false);
+    setConsentTerms(false);
+    setSubmitError(null);
+    setIsSubmitting(false);
+  };
+
   const handleBack = () => {
     if (step === "banks") {
       setPersona(null);
       setSelectedBanks([]);
       setSelectedAmount(null);
       setBorrowerCount(null);
-      setConsentPrivacy(false);
-      setConsentTerms(false);
-      setContactName("");
-      setContactPhone("");
-      setContactEmail("");
+      resetContact();
       setStep("persona");
     } else if (step === "amount") {
       setSelectedAmount(null);
@@ -132,11 +148,7 @@ export default function LeadFlowForm() {
       setBorrowerCount(null);
       setStep("amount");
     } else if (step === "contact") {
-      setContactName("");
-      setContactPhone("");
-      setContactEmail("");
-      setConsentPrivacy(false);
-      setConsentTerms(false);
+      resetContact();
       setStep("borrowers");
     } else if (step === "summary") {
       setStep("contact");
@@ -145,24 +157,69 @@ export default function LeadFlowForm() {
   };
 
   const handleProceedBanks = () => {
-    if (!canProceedBanks) return;
-    setStep("amount");
+    if (canProceedBanks) setStep("amount");
   };
 
   const handleProceedAmount = () => {
-    if (!canProceedAmount) return;
-    setStep("borrowers");
+    if (canProceedAmount) setStep("borrowers");
   };
 
   const handleProceedBorrowers = () => {
-    if (!canProceedBorrowers) return;
-    setStep("contact");
+    if (canProceedBorrowers) setStep("contact");
   };
 
-  const handleProceedContact = () => {
-    if (!canProceedContact) return;
-    setStep("summary");
-    setSubmitted(true);
+  const handleProceedContact = async () => {
+    if (!canProceedContact || !persona || !selectedAmount || !borrowerCount) return;
+
+    if (!DEFAULT_ADMIN_ID) {
+      setSubmitError(
+        "Kein verantwortlicher Admin konfiguriert. Bitte NEXT_PUBLIC_CAMPAIGN_ADMIN_ID setzen."
+      );
+      return;
+    }
+
+    setIsSubmitting(true);
+    setSubmitError(null);
+
+    try {
+      const sourceUrl =
+        typeof window !== "undefined" ? window.location.href : undefined;
+      const response = await fetch("/api/campaign/kreditbearbeitungs", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          adminId: DEFAULT_ADMIN_ID,
+          persona,
+          selectedBanks,
+          loanAmountRange: selectedAmount,
+          borrowerCount,
+          contactName,
+          contactPhone,
+          contactEmail,
+          consentPrivacy,
+          consentTerms,
+          metadata: { source_url: sourceUrl },
+        }),
+      });
+
+      const payload = await response.json().catch(() => ({}));
+
+      if (!response.ok) {
+        throw new Error(
+          typeof payload?.error === "string"
+            ? payload.error
+            : "Lead konnte nicht gespeichert werden."
+        );
+      }
+
+      setLeadId(typeof payload?.leadId === "string" ? payload.leadId : null);
+      setStep("summary");
+      setSubmitted(true);
+    } catch (error) {
+      setSubmitError(error instanceof Error ? error.message : "Unbekannter Fehler.");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -308,16 +365,13 @@ export default function LeadFlowForm() {
           </p>
 
           <div className="mt-6 grid gap-4 md:grid-cols-2">
-            {[
-              { value: "single", label: "Ich bin der Einzige" },
-              { value: "multiple", label: "Es gibt mehrere Kreditnehmer" },
-            ].map((option) => {
+            {borrowerOptions.map((option) => {
               const active = borrowerCount === option.value;
               return (
                 <button
                   key={option.value}
                   type="button"
-                  onClick={() => setBorrowerCount(option.value as "single" | "multiple")}
+                  onClick={() => setBorrowerCount(option.value)}
                   className={`flex flex-col items-center gap-3 rounded-3xl border px-5 py-5 text-base font-semibold transition ${
                     active
                       ? "border-[#1d5edb] bg-[#f0f4ff] text-[#1d5edb]"
@@ -330,43 +384,6 @@ export default function LeadFlowForm() {
             })}
           </div>
 
-          <div className="mt-8 space-y-3 text-left text-sm text-[#3b4a68]">
-            <label className="flex items-center gap-3">
-              <input
-                type="checkbox"
-                checked={consentPrivacy}
-                onChange={(event) => setConsentPrivacy(event.target.checked)}
-                className="h-4 w-4 rounded border-[#cfe0ff] text-[#1d5edb] focus:ring-[#1d5edb]"
-              />
-              <span>
-                Ich akzeptiere die{" "}
-                <Link href="#" className="underline">
-                  Datenschutzbestimmungen
-                </Link>{" "}
-                und habe die{" "}
-                <Link href="#" className="underline">
-                  Widerrufsbelehrung
-                </Link>{" "}
-                gelesen.
-              </span>
-            </label>
-            <label className="flex items-center gap-3">
-              <input
-                type="checkbox"
-                checked={consentTerms}
-                onChange={(event) => setConsentTerms(event.target.checked)}
-                className="h-4 w-4 rounded border-[#cfe0ff] text-[#1d5edb] focus:ring-[#1d5edb]"
-              />
-              <span>
-                Ich akzeptiere die{" "}
-                <Link href="#" className="underline">
-                  Allgemeinen Finanzierungsbedingungen
-                </Link>
-                .
-              </span>
-            </label>
-          </div>
-
           <button
             type="button"
             disabled={!canProceedBorrowers}
@@ -377,7 +394,7 @@ export default function LeadFlowForm() {
                 : "cursor-not-allowed bg-[#e2e8f5] text-[#94a3b8]"
             }`}
           >
-            Speichern &amp; zurück
+            Weiter
           </button>
         </div>
       )}
@@ -399,10 +416,11 @@ export default function LeadFlowForm() {
 
           <div className="mt-4 space-y-2 text-center">
             <span className="inline-flex items-center justify-center rounded-full bg-[#34d399]/15 px-4 py-1 text-xs font-semibold uppercase tracking-[0.4em] text-[#0f5132]">
-              Geschafft!
+              Geschafft! Letzter Schritt ✓
             </span>
             <p className="text-xs text-[#3b4a68]/70">
-              Um deine Anfrage zu qualifizieren, benötigen wir jetzt nur noch deine Kontaktdaten.
+              Wir können nur qualifizierte Anfragen beantworten. Bitte hinterlasse uns daher deine
+              Kontaktdaten.
             </p>
             <h2 className="text-3xl font-semibold text-[#11273e]">
               Wie können wir dich am besten erreichen?
@@ -485,17 +503,23 @@ export default function LeadFlowForm() {
             </div>
           </form>
 
+          {submitError && (
+            <div className="mt-4 rounded-2xl border border-[#facc15] bg-[#fffbeb] px-4 py-3 text-sm text-[#92400e]">
+              {submitError}
+            </div>
+          )}
+
           <button
             type="button"
-            disabled={!canProceedContact}
+            disabled={!canProceedContact || isSubmitting}
             onClick={handleProceedContact}
             className={`mt-8 w-full rounded-2xl px-5 py-3 text-sm font-semibold uppercase tracking-wide transition ${
-              canProceedContact
+              canProceedContact && !isSubmitting
                 ? "bg-[#1d5edb] text-white hover:bg-[#174cbc]"
                 : "cursor-not-allowed bg-[#e2e8f5] text-[#94a3b8]"
             }`}
           >
-            Anfrage abschicken!
+            {isSubmitting ? "Wird gesendet …" : "Anfrage abschicken!"}
           </button>
         </div>
       )}
@@ -523,17 +547,33 @@ export default function LeadFlowForm() {
               <strong>Banken:</strong> {selectedBanks.join(", ")}
             </p>
             <p>
-              <strong>Kreditsumme:</strong> {selectedAmount ?? "–"}
+              <strong>Kreditsumme:</strong> {selectedAmount}
             </p>
             <p>
               <strong>Kreditnehmer:</strong>{" "}
               {borrowerCount === "multiple" ? "Mehrere Kreditnehmer" : "Ein Kreditnehmer"}
             </p>
+            <p>
+              <strong>Kontakt:</strong> {contactName} · {contactPhone} · {contactEmail}
+            </p>
+            {leadId && (
+              <p>
+                <strong>Lead-ID:</strong> {leadId}
+              </p>
+            )}
+          </div>
+          <div className="mt-6 rounded-2xl bg-[#f7faff] px-5 py-4 text-sm text-[#3b4a68]">
+            Danke für dein Vertrauen! Unser Team meldet sich innerhalb eines Werktags. Du kannst
+            uns jederzeit unter{" "}
+            <Link href="mailto:office@multipartners.at" className="text-[#1d5edb] underline">
+              office@multipartners.at
+            </Link>{" "}
+            erreichen.
           </div>
         </div>
       )}
 
-      {submitted && persona && selectedAmount && borrowerCount && canProceedContact && (
+      {submitted && (
         <div className="rounded-3xl bg-[#f7faff] p-6 text-left shadow-inner">
           <h3 className="text-lg font-semibold text-[#11273e]">
             Fast geschafft – Multi Partners kümmert sich um den Rest.
