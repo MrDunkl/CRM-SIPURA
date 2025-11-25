@@ -2,14 +2,10 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 
-const CYCLE_INTERVAL_MS = 3000;
 const FADE_DURATION_MS = 220;
 
 export default function AnimatedHeadline() {
-  const words = useMemo(
-    () => ["lösen", "strukturieren", "optimieren", "digitalisieren"],
-    []
-  );
+  const words = useMemo(() => ["finanzieren", "kaufen", "lösen"], []);
   const [index, setIndex] = useState(0);
   const [isFading, setIsFading] = useState(false);
   const fadeTimeoutRef = useRef<ReturnType<typeof setTimeout>>();
@@ -21,7 +17,7 @@ export default function AnimatedHeadline() {
         setIndex((prev) => (prev + 1) % words.length);
         setIsFading(false);
       }, FADE_DURATION_MS);
-    }, CYCLE_INTERVAL_MS);
+    }, 5000);
 
     return () => {
       window.clearInterval(intervalId);
