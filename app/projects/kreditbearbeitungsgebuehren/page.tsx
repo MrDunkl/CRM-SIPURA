@@ -1,19 +1,5 @@
 import Link from "next/link";
-
-const personaCards = [
-  {
-    title: "Als Privatperson",
-    description:
-      "Ideal für Immobilien- oder Konsumentenkredite. Wir prüfen kostenlos, ob deine Bank zu hohe Bearbeitungsgebühren verrechnet hat.",
-    href: "/lead", // adjust to actual funnel target
-  },
-  {
-    title: "Als Unternehmen",
-    description:
-      "Für Unternehmerkredite und Firmenfinanzierungen. Wir analysieren Verträge, dokumentieren Gebühren und holen das Geld zurück.",
-    href: "/lead",
-  },
-];
+import LeadFlowForm from "./components/LeadFlowForm";
 
 export default function KreditbearbeitungsgebuehrenPage() {
   const faqs = [
@@ -65,26 +51,7 @@ export default function KreditbearbeitungsgebuehrenPage() {
           </p>
         </div>
 
-        <section className="grid gap-8 md:grid-cols-2">
-          {personaCards.map((card) => (
-            <div
-              key={card.title}
-              className="flex flex-col gap-4 rounded-3xl bg-white p-8 text-left shadow-[0_20px_60px_-25px_rgba(17,39,62,0.3)] transition hover:-translate-y-2 hover:shadow-[0_26px_70px_-30px_rgba(29,94,219,0.35)]"
-            >
-              <span className="text-sm font-medium uppercase tracking-[0.3em] text-[#9aa9c8]">
-                Option
-              </span>
-              <h2 className="text-2xl font-semibold text-[#11273e]">{card.title}</h2>
-              <p className="text-sm leading-relaxed text-[#3b4a68]">{card.description}</p>
-              <Link
-                href={card.href}
-                className="mt-auto inline-flex items-center justify-center rounded-2xl bg-[#1d5edb] px-4 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-[#174cbc]"
-              >
-                Schritt starten
-              </Link>
-            </div>
-          ))}
-        </section>
+        <LeadFlowForm />
 
         <section className="rounded-3xl bg-white/70 p-8 text-left shadow-inner">
           <h3 className="text-xl font-semibold text-[#11273e]">Wie läuft die Prüfung ab?</h3>
