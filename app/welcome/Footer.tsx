@@ -1,7 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { FiFacebook, FiMail, FiPhoneCall, FiWhatsapp } from "react-icons/fi";
+import { FaWhatsapp } from "react-icons/fa";
+import { FiFacebook, FiMail, FiPhoneCall } from "react-icons/fi";
 import { TbMapPin } from "react-icons/tb";
 
 const sections = [
@@ -17,7 +18,7 @@ const sections = [
       },
     ],
     social: [
-      { icon: <FiWhatsapp />, label: "WhatsApp", href: "https://wa.me/43012266633", color: "bg-[#25D366]" },
+      { icon: <FaWhatsapp />, label: "WhatsApp", href: "https://wa.me/43012266633", color: "bg-[#25D366]" },
       { icon: <FiFacebook />, label: "Facebook", href: "https://facebook.com", color: "bg-[#3b5998]" },
       { icon: <FiPhoneCall />, label: "Telefon", href: "tel:+4312266633", color: "bg-[#f3b63f]" },
       { icon: <FiMail />, label: "E-Mail", href: "mailto:office@multipartners.at", color: "bg-[#f35f4f]" },
